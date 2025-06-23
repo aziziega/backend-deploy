@@ -3,8 +3,9 @@ import streamlit as st
 import numpy as np
 import joblib
 
-# Load model
-model = joblib.load("model/logistic_regression_model.pkl")  # Pastikan path dan nama file model sesuai
+# Load model dan scaler
+model = joblib.load("model/logistic_regression_model.pkl")  # Pastikan path dan nama file sesuai
+scaler = joblib.load("model/scaler.pkl")  # Tambahkan ini untuk scaling
 class_names = ["Tidak Diabetes", "Diabetes"]
 
 # Konfigurasi halaman
@@ -31,16 +32,24 @@ with st.form("form_diabetes"):
 
 if submitted:
     try:
-        input_data = np.array([[
+        # Ambil input dan ubah ke float
+        input_data = np.array([[ 
             float(pregnancies), float(glucose), float(blood_pressure),
             float(skin_thickness), float(insulin), float(bmi),
             float(dpf), float(age)
         ]])
 
-        prediction = model.predict(input_data)[0]
+        # Scaling data
+        input_scaled = scaler.transform(input_data)
+
+        # Prediksi
+        prediction = model.predict(input_scaled)[0]
         result_text = class_names[prediction]
+
+        # Tampilkan hasil
         st.success(f"Hasil prediksi model: **{result_text}**")
 
+        # Tampilkan input dalam bentuk list
         st.markdown("### Detail Input yang Anda Masukkan:")
         st.markdown(f"""
         - **Umur (Age)**: {age}
