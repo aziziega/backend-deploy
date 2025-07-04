@@ -20,8 +20,8 @@ with st.form("form_diabetes"):
         age = st.text_input("Age")
         
         # Pregnancies: Ya atau Tidak
-        pregnancies_option = st.selectbox("Apakah Pernah Hamil?", ["Tidak", "Ya"])
-        if pregnancies_option == "Ya":
+        pregnancies_option = st.selectbox("Pregnancies", ["No", "Yes"])
+        if pregnancies_option == "Yes":
             pregnancies = st.text_input("Jumlah Kehamilan")
         else:
             pregnancies = "0"
