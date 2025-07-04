@@ -4,8 +4,8 @@ import numpy as np
 import joblib
 
 # Load model dan scaler
-model = joblib.load("model/logistic_regression_model.pkl")  # Pastikan path dan nama file sesuai
-scaler = joblib.load("model/scaler.pkl")  # Tambahkan ini untuk scaling
+model = joblib.load("model/logistic_regression_model.pkl")
+scaler = joblib.load("model/scaler.pkl")
 class_names = ["Tidak Diabetes", "Diabetes"]
 
 # Konfigurasi halaman
@@ -18,20 +18,37 @@ with st.form("form_diabetes"):
 
     with col1:
         age = st.text_input("Age")
-        pregnancies = st.text_input("Pregnancies")
-        glucose = st.text_input("Glucose")
-        blood_pressure = st.text_input("Blood Pressure")
+        
+        # Pregnancies: Ya atau Tidak
+        pregnancies_option = st.selectbox("Apakah Pernah Hamil?", ["Tidak", "Ya"])
+        if pregnancies_option == "Ya":
+            pregnancies = st.text_input("Jumlah Kehamilan")
+        else:
+            pregnancies = "0"
+
+        glucose = st.text_input("Glucose (mg/dL) [Normal: 70-100]")
+        blood_pressure = st.text_input("Blood Pressure (mmHg) [Normal: 80-120]")
+
     
     with col2:
-        insulin = st.text_input("Insulin")
-        bmi = st.text_input("BMI")
-        skin_thickness = st.text_input("Skin Thickness")
-        dpf = st.text_input("DPF")
+        insulin = st.text_input("Insulin (µIU/mL) [Normal: 5-25]")
+        
+        # Input Tinggi dan Berat Badan
+        height_cm = st.text_input("Tinggi Badan (cm)")
+        weight_kg = st.text_input("Berat Badan (kg)")
 
     submitted = st.form_submit_button("Prediksi!", type="primary")
 
 if submitted:
     try:
+        # Hitung BMI
+        height_m = float(height_cm) / 100
+        bmi = float(weight_kg) / (height_m ** 2)
+
+        # Tetapkan nilai default untuk Skin Thickness dan DPF
+        skin_thickness = 20
+        dpf = 0.5
+
         # Ambil input dan ubah ke float
         input_data = np.array([[ 
             float(pregnancies), float(glucose), float(blood_pressure),
@@ -49,20 +66,23 @@ if submitted:
         # Tampilkan hasil
         st.success(f"Hasil prediksi model: **{result_text}**")
 
-        # Tampilkan input dalam bentuk list
+        # Tampilkan detail input
         st.markdown("### Detail Input yang Anda Masukkan:")
         st.markdown(f"""
         - **Umur (Age)**: {age}
+        - **Apakah Pernah Hamil?**: {pregnancies_option}    
         - **Jumlah Kehamilan (Pregnancies)**: {pregnancies}
         - **Kadar Glukosa (Glucose)**: {glucose}
         - **Tekanan Darah (Blood Pressure)**: {blood_pressure}
-        - **Ketebalan Kulit (Skin Thickness)**: {skin_thickness}
+        - **Ketebalan Kulit (Skin Thickness)**: {skin_thickness} (default) 
         - **Insulin**: {insulin}
-        - **Indeks Massa Tubuh (BMI)**: {bmi}
-        - **Fungsi Riwayat Diabetes (DPF)**: {dpf}
+        - **Indeks Massa Tubuh (BMI)**: {bmi:.2f}
+        - **Fungsi Riwayat Diabetes (DPF)**: {dpf} (default)
+        - **Tinggi Badan**: {height_cm} cm
+        - **Berat Badan**: {weight_kg} kg
         """)
 
     except ValueError:
-        st.error("Pastikan semua input diisi dengan angka yang valid.")
+        st.error("Pastikan semua input diisi dengan angka yang valid dan lengkap.")
 
 st.caption("Aplikasi Prediksi Diabetes menggunakan Streamlit & Scikit-learn")
