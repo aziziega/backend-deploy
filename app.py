@@ -35,7 +35,7 @@ with st.form("form_diabetes"):
         
         # Input Tinggi dan Berat Badan
         height_cm = st.text_input("Height (cm)")
-        weight_kg = st.text_input("Weight Badan (kg)")
+        weight_kg = st.text_input("Weight (kg)")
 
     submitted = st.form_submit_button("Prediksi!", type="primary")
 
