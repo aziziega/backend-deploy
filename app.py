@@ -1,7 +1,7 @@
 # app.py
 import streamlit as st
 import numpy as np
-import joblib
+import joblib   
 
 # Load model dan scaler
 model = joblib.load("model/logistic_regression_model.pkl")
@@ -18,9 +18,7 @@ with st.form("form_diabetes"):
 
     with col1:
         age = st.text_input("Age")
-        
-        # Pregnancies: Ya atau Tidak
-        pregnancies_option = st.selectbox("Pregnancies", ["No", "Yes"])
+        pregnancies_option = st.selectbox("Apakah pernah hamil?", ["No", "Yes"])
         if pregnancies_option == "Yes":
             pregnancies = st.text_input("Jumlah Kehamilan")
         else:
@@ -28,12 +26,11 @@ with st.form("form_diabetes"):
 
         glucose = st.text_input("Glucose (mg/dL) [Normal: 70-100]")
         blood_pressure = st.text_input("Blood Pressure (mmHg) [Normal: 80-120]")
+        skin_thickness = st.text_input("Skin Thickness (mm) [Normal: 10-50]")
 
-    
     with col2:
         insulin = st.text_input("Insulin (µIU/mL) [Normal: 5-25]")
-        
-        # Input Tinggi dan Berat Badan
+        dpf = st.text_input("Diabetes Pedigree Function [Normal: 0.1 - 2.5]")
         height_cm = st.text_input("Height (cm)")
         weight_kg = st.text_input("Weight (kg)")
 
@@ -41,46 +38,49 @@ with st.form("form_diabetes"):
 
 if submitted:
     try:
-        # Hitung BMI
-        height_m = float(height_cm) / 100
-        bmi = float(weight_kg) / (height_m ** 2)
+        # Validasi input jumlah kehamilan jika "Yes"
+        if pregnancies_option == "Yes" and pregnancies.strip() == "":
+            st.error("Silakan isi jumlah kehamilan.")
+        else:
+            # Hitung BMI
+            height_m = float(height_cm) / 100
+            bmi = float(weight_kg) / (height_m ** 2)
 
-        # Tetapkan nilai default untuk Skin Thickness dan DPF
-        skin_thickness = 20
-        dpf = 0.5
+            # Ambil input dan ubah ke float
+            input_data = np.array([[ 
+                float(pregnancies), float(glucose), float(blood_pressure),
+                float(skin_thickness), float(insulin), float(bmi),
+                float(dpf), float(age)
+            ]])
 
-        # Ambil input dan ubah ke float
-        input_data = np.array([[ 
-            float(pregnancies), float(glucose), float(blood_pressure),
-            float(skin_thickness), float(insulin), float(bmi),
-            float(dpf), float(age)
-        ]])
+            # Scaling data
+            input_scaled = scaler.transform(input_data)
 
-        # Scaling data
-        input_scaled = scaler.transform(input_data)
+            # Probabilitas prediksi
+            proba = model.predict_proba(input_scaled)[0]
+            threshold = 0.4  # bisa diubah sesuai performa model
+            prediction = 1 if proba[1] > threshold else 0
+            result_text = class_names[prediction]
 
-        # Prediksi
-        prediction = model.predict(input_scaled)[0]
-        result_text = class_names[prediction]
+            # Tampilkan hasil
+            st.success(f"Hasil prediksi model: **{result_text}**")
+            st.info(f"Probabilitas Tidak Diabetes: **{proba[0]:.2f}**, Diabetes: **{proba[1]:.2f}**")
 
-        # Tampilkan hasil
-        st.success(f"Hasil prediksi model: **{result_text}**")
-
-        # Tampilkan detail input
-        st.markdown("### Detail Input yang Anda Masukkan:")
-        st.markdown(f"""
-        - **Umur (Age)**: {age}
-        - **Apakah Pernah Hamil?**: {pregnancies_option}    
-        - **Jumlah Kehamilan (Pregnancies)**: {pregnancies}
-        - **Kadar Glukosa (Glucose)**: {glucose}
-        - **Tekanan Darah (Blood Pressure)**: {blood_pressure}
-        - **Ketebalan Kulit (Skin Thickness)**: {skin_thickness} (default) 
-        - **Insulin**: {insulin}
-        - **Indeks Massa Tubuh (BMI)**: {bmi:.2f}
-        - **Fungsi Riwayat Diabetes (DPF)**: {dpf} (default)
-        - **Tinggi Badan**: {height_cm} cm
-        - **Berat Badan**: {weight_kg} kg
-        """)
+            # Tampilkan detail input
+            st.markdown("### Detail Input yang Anda Masukkan:")
+            st.markdown(f"""
+            - **Umur (Age)**: {age}
+            - **Apakah Pernah Hamil?**: {pregnancies_option}    
+            - **Jumlah Kehamilan (Pregnancies)**: {pregnancies}
+            - **Kadar Glukosa (Glucose)**: {glucose}
+            - **Tekanan Darah (Blood Pressure)**: {blood_pressure}
+            - **Ketebalan Kulit (Skin Thickness)**: {skin_thickness}
+            - **Insulin**: {insulin}
+            - **Indeks Massa Tubuh (BMI)**: {bmi:.2f}
+            - **Fungsi Riwayat Diabetes (DPF)**: {dpf}
+            - **Tinggi Badan**: {height_cm} cm
+            - **Berat Badan**: {weight_kg} kg
+            """)
 
     except ValueError:
         st.error("Pastikan semua input diisi dengan angka yang valid dan lengkap.")
