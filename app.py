@@ -62,9 +62,12 @@ if submitted:
             prediction = 1 if proba[1] > threshold else 0
             result_text = class_names[prediction]
 
-            # Tampilkan hasil
+            # Tampilkan hasil# Menampilkan hasil prediksi
             st.success(f"Hasil prediksi model: **{result_text}**")
-            st.info(f"Probabilitas Tidak Diabetes: **{proba[0]:.2f}**, Diabetes: **{proba[1]:.2f}**")
+
+            # Menampilkan probabilitas dalam bentuk persen
+            st.info(f"Probabilitas Tidak Diabetes: **{proba[0] * 100:.2f}%**, Diabetes: **{proba[1] * 100:.2f}%**")
+
 
             # Tampilkan detail input
             st.markdown("### Detail Input yang Anda Masukkan:")
@@ -85,4 +88,38 @@ if submitted:
     except ValueError:
         st.error("Pastikan semua input diisi dengan angka yang valid dan lengkap.")
 
+with st.expander("❓ FAQ - Penjelasan Masing-Masing Fitur Input"):
+    st.markdown("""
+    **1. Umur (Age)**  
+    - Usia merupakan salah satu faktor utama yang mempengaruhi risiko diabetes. Umumnya, semakin tua usia seseorang, semakin tinggi risikonya.
+
+    **2. Apakah Pernah Hamil?**  
+    - Wanita yang pernah hamil, khususnya dengan diabetes gestasional, memiliki kemungkinan lebih tinggi terkena diabetes tipe 2.
+
+    **3. Jumlah Kehamilan (Pregnancies)**  
+    - Jumlah kehamilan mencerminkan beban metabolik yang bisa memengaruhi sensitivitas insulin.
+
+    **4. Kadar Glukosa (Glucose)**  
+    - Merupakan kadar gula dalam darah. Nilai tinggi bisa menunjukkan kondisi pra-diabetes atau diabetes.
+
+    **5. Tekanan Darah (Blood Pressure)**  
+    - Hipertensi sering terjadi bersamaan dengan diabetes. Memantau tekanan darah penting untuk kesehatan kardiovaskular.
+
+    **6. Ketebalan Kulit (Skin Thickness)**  
+    - Digunakan untuk mengukur lemak subkutan, yang berkaitan dengan obesitas dan risiko diabetes.
+
+    **7. Insulin**  
+    - Merupakan hormon yang mengatur kadar glukosa darah. Nilai abnormal bisa menunjukkan gangguan metabolik.
+
+    **8. Indeks Massa Tubuh (BMI)**  
+    - Mengukur rasio berat terhadap tinggi. BMI tinggi (obesitas) sangat berkaitan erat dengan risiko diabetes tipe 2.
+
+    **9. Fungsi Riwayat Diabetes (DPF)**  
+    - Nilai yang menunjukkan riwayat diabetes dalam keluarga. Semakin tinggi DPF, semakin besar risikonya.
+
+    **10. Tinggi Badan & Berat Badan**  
+    - Digunakan untuk menghitung BMI dan membantu menilai apakah berat badan ideal.
+    """)
+
 st.caption("Aplikasi Prediksi Diabetes menggunakan Streamlit & Scikit-learn")
+
